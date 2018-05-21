@@ -366,31 +366,75 @@ class RgeDictUpdater:
 
         return result_df
 
-    class RegistryGenUpdater:
+class RegistryGenUpdater:
 
-        """Class for checking 'dict_registry_gen' table for updates."""
+    """Class for checking 'dict_registry_gen' table for updates."""
 
-        def __init__(self, rio_path, dict_path, begin_date, end_date,
+    def __init__(self, rio_path, dict_path, begin_date, end_date,
                      version=0, dict_sheet_name='REGISTRY_GEN'):
-            self.rio_path = rio_path
-            self.dict_path = dict_path
-            self.dict_sheet_name = dict_sheet_name
-            self.begin_date = begin_date
-            self.end_date = end_date
-            self.version = version
-            self.__load_data()
 
-        def __load_data(self):
-            """
-            Reads dict and RIO data from the specified file paths
-            """
+        """
+        Constructor
+        :param rio_path: path to rio file
+        :param dict_path: path to dictionary file
+        :param begin_date: begin date of the period
+        :param end_date: end date of the period
+        :param version: version of the dictionary
+        :param dict_sheet_name: name of the sheet, default = REGISTRY_GEN
+        """
 
-            rio_data = pd.read_excel(self.rio_path)
-            dict_data = pd.read_excel(self.dict_path, sheet_name=self.dict_sheet_name)
+        self.rio_path = rio_path
+        self.dict_path = dict_path
+        self.dict_sheet_name = dict_sheet_name
+        self.begin_date = begin_date
+        self.end_date = end_date
+        self.version = version
+        self.rio_data, self.dict_data = self.__load_data()
+        #self.missing_stations_list = __get_missing_stations_list()
 
-            # transfer column names to uppercase
-            rio_data.columns = [s.upper() for s in rio_data.columns]
-            dict_data.columns = [s.upper() for s in dict_data.columns]
+    def __load_data(self):
+        """
+        Reads dict and RIO data from the specified file paths
+        """
+
+        rio_data = pd.read_excel(self.rio_path)
+        dict_data = pd.read_excel(self.dict_path, sheet_name=self.dict_sheet_name)
+
+        # transfer column names to uppercase
+        rio_data.columns = [s.upper() for s in rio_data.columns]
+        dict_data.columns = [s.upper() for s in dict_data.columns]
+
+        return rio_data, dict_data
+
+    def update_registry_gen(self):
+
+        def extract_station_type(st_name):
+
+            """Function for generating station_type value from station_name
+                Attributes: st_name - string with station_name value
+
+                :return: station type code"""
+
+            s_u = st_name.upper()
+            if any(word in s_u for word in ['ТЭЦ', 'ТЭС', 'ГПЭС', 'ДЭС', 'ПГУ']):
+                return 1
+            elif 'ГЭС' in s_u:
+                return 2
+            elif 'АЭС' in s_u:
+                return 3
+            elif 'ГРЭС' in s_u:
+                return 4
+            elif 'СЭС' in s_u or 'СОЛНЕЧНАЯ' in s_u:
+                return 5
+            elif 'ВЭС' in s_u or 'ВЕТРОВАЯ' in s_u:
+                return 6
+            else:
+                logging.info(f"Тип станции '{st_name}' не опрелелен")
+                return 0
+
+        df = self.rio_data[['TRADER_CODE', 'COMPANY_NAME', 'STATION_CODE', 'STATTION_NAME']]
+        df['STATION_TYPE'] = df.STATION_NAME.map(extract_station_type)
+
 
 
 if __name__ == "__main__":
