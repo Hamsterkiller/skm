@@ -166,7 +166,7 @@ class RgeDictUpdater:
         if draw_map:
             fig, ax = plt.subplots(figsize=(8, 12))
             sns.heatmap(result_mask.astype(int).T)
-            plt.title('Map of matched/unmatched columns')
+            plt.title(f'Map of matched/unmatched columns for {self.dict_sheet_name} dictionary')
             ax.set_xticklabels(comp_cols)
             ax.tick_params(axis='y', which='both', left=False, right=False, labelleft=False)
             plt.tight_layout(rect=[0, 0.03, 1, 0.95])
@@ -366,23 +366,13 @@ class RgeDictUpdater:
 
         return result_df
 
+
 class RegistryGenUpdater:
 
     """Class for checking 'dict_registry_gen' table for updates."""
 
     def __init__(self, rio_path, dict_path, begin_date, end_date,
-                     version=0, dict_sheet_name='REGISTRY_GEN'):
-
-        """
-        Constructor
-        :param rio_path: path to rio file
-        :param dict_path: path to dictionary file
-        :param begin_date: begin date of the period
-        :param end_date: end date of the period
-        :param version: version of the dictionary
-        :param dict_sheet_name: name of the sheet, default = REGISTRY_GEN
-        """
-
+                 version=0, dict_sheet_name='REGISTRY_GEN'):
         self.rio_path = rio_path
         self.dict_path = dict_path
         self.dict_sheet_name = dict_sheet_name
@@ -390,14 +380,17 @@ class RegistryGenUpdater:
         self.end_date = end_date
         self.version = version
         self.rio_data, self.dict_data = self.__load_data()
-        #self.missing_stations_list = __get_missing_stations_list()
 
     def __load_data(self):
+
         """
         Reads dict and RIO data from the specified file paths
         """
 
         rio_data = pd.read_excel(self.rio_path)
+        rio_data = rio_data[['TRADER_CODE', 'COMPANY_NAME', 'STATION_CODE', 'STATION_NAME']] \
+            .rename(columns={'COMPANY_NAME': 'TRADER_NAME'}) \
+            .drop_duplicates()
         dict_data = pd.read_excel(self.dict_path, sheet_name=self.dict_sheet_name)
 
         # transfer column names to uppercase
@@ -406,7 +399,89 @@ class RegistryGenUpdater:
 
         return rio_data, dict_data
 
+    def compare_registry_gen(self, left_on, right_on, comp_cols, draw_map=False):
+
+        # select only actual information
+        actual_dict_rows = self.dict_data[self.dict_data.DATE_TO.isnull()]
+
+        # merge two datasets
+        dict_rio = actual_dict_rows.merge(right=self.rio_data, left_on=left_on, right_on=right_on,
+                                          how='left', suffixes=('_DICT', '_RIO')).sort_values(by=left_on)
+        # dict_rio = dict_rio.drop(right_on, axis=1)
+
+        # check if merging was OK
+        assert (actual_dict_rows.shape[0] == dict_rio.shape[0])
+
+        # check for duplicate RGE codes
+        assert (len(pd.unique(dict_rio.STATION_CODE)) == dict_rio.shape[0])
+
+        # obtaining map of unmatched fields
+        result_mask = []
+        result_mask_dict = {}
+        for col in comp_cols:
+            col1 = col + '_DICT'
+            col2 = col + '_RIO'
+            # logging.info('Comparing columns ' + col1 + ' and ' + col2)
+            result_mask.append(list(compare_str_series(dict_rio[col1], dict_rio[col2])))
+            result_mask_dict[col] = list(compare_str_series(dict_rio[col1], dict_rio[col2]))
+
+        result_mask = np.array(result_mask)
+
+        # logical sum: checking if there's any fully matched rows
+        matched_rows_mask = (np.sum(result_mask, axis=0) == result_mask.shape[0])
+        unmatched_rows_mask = (np.sum(result_mask, axis=0) != result_mask.shape[0])
+
+        try:
+            assert (np.sum(unmatched_rows_mask) + np.sum(matched_rows_mask) == result_mask.shape[1])
+        except AssertionError:
+            logging.info('Sum of matched and unmatched rows is not equal to the total number of rows compared!')
+            traceback.print_exc()
+
+        if draw_map:
+            fig, ax = plt.subplots(figsize=(8, 12))
+            sns.heatmap(result_mask.astype(int).T)
+            plt.title(f'Map of matched/unmatched columns for {self.dict_sheet_name} dictionary')
+            ax.set_xticklabels(comp_cols)
+            ax.tick_params(axis='y', which='both', left=False, right=False, labelleft=False)
+            plt.tight_layout(rect=[0, 0.03, 1, 0.95])
+            plt.savefig(f'C:\\temp\\unmatching_map_{self.begin_date}.png')
+
+        result = {'result_mask_dict': result_mask_dict,
+                  'matched_rows_mask': matched_rows_mask,
+                  'unmatched_rows_mask': unmatched_rows_mask,
+                  'dict_rio': dict_rio}
+
+        return result
+
     def update_registry_gen(self):
+
+        """
+        TODO: Fill docstring
+        :return:
+        """
+
+        def retrieve_holding_info(df, miss):
+
+            """
+            Function for retrieving information about holding from
+                existing pairs tradec_code -> holding in dict_registry_gen
+            :param df: distinct selection of pairs tradec_code -> holding
+                        from dict_registry_gen table (columns: TRADER_CODE, HOLDING, CODE)
+            :param miss: list of trader_code values of dataframe
+                                with missing stations
+            :return: dict of structure: {'TRADER_CODE': ['HOLDING', 'CODE']}, where CODE - holding code,
+                HOLDING - holding name
+            """
+
+            res = dict()
+            for k, v in miss.items():
+                df_t = df[df.TRADER_CODE == k].drop_duplicates()
+                if df_t.empty:
+                    res[k] = (v, k)
+                    print(f'Trader code {k} was not mentioned before in dict_registry_gen table!')
+                else:
+                    res[k] = (df_t.HOLDING.values[0], df_t.CODE.values[0])
+            return res
 
         def extract_station_type(st_name):
 
@@ -432,9 +507,21 @@ class RegistryGenUpdater:
                 logging.info(f"Тип станции '{st_name}' не опрелелен")
                 return 0
 
-        df = self.rio_data[['TRADER_CODE', 'COMPANY_NAME', 'STATION_CODE', 'STATTION_NAME']]
+        rio_stations = list(pd.unique(self.rio_data.STATION_CODE))
+        dict_stations = list(pd.unique(self.dict_data.STATION_CODE))
+        missing_stations = [st for st in rio_stations if st not in dict_stations]
+        # data from rio for the missing (in dict_data) stations
+        df = self.rio_data[self.rio_data.STATION_CODE.isin(missing_stations)] \
+            .filter(items=['TRADER_CODE', 'TRADER_NAME', 'STATION_CODE', 'STATION_NAME'], axis=1) \
+            .drop_duplicates()
+        # generate STATION_TYPE variable
         df['STATION_TYPE'] = df.STATION_NAME.map(extract_station_type)
-
+        miss = df[['TRADER_CODE', 'TRADER_NAME']].drop_duplicates().set_index('TRADER_CODE'). \
+            to_dict().get('TRADER_NAME')
+        holding_tcode_dict = retrieve_holding_info(self.dict_data[['TRADER_CODE', 'TRADER_NAME', 'HOLDING', 'CODE']]
+                                                   .drop_duplicates(), miss)
+        df['HOLDING'] = df.TRADER_CODE.map(lambda t: holding_tcode_dict.get(t)[0])
+        df['CODE'] = df.TRADER_CODE.map(lambda t: holding_tcode_dict.get(t)[1])
 
 
 if __name__ == "__main__":
@@ -444,13 +531,13 @@ if __name__ == "__main__":
     logging.basicConfig(format=u'%(filename)s[LINE:%(lineno)d]# %(levelname)-8s [%(asctime)s]  %(message)s',
                         level=logging.DEBUG, filename=log_path, filemode='w')
     logging.info('\nStarting...')
-    rge_checker = RgeDictUpdater('data/RIO_2018_05.xlsx', 'data/hdbk_326.xlsx', date_from, date_to)
-    cols = ['STATION_CODE', 'STATION_NAME', 'GTP_CODE', 'GTP_NAME', 'RGE_NAME']
+    st_checker = RegistryGenUpdater('data/RIO_2018_05.xlsx', 'data/hdbk_326.xlsx', date_from, date_to)
+    cols = ['STATION_CODE', 'STATION_NAME', 'TRADER_CODE', 'TRADER_NAME']
     # result of the comparison
-    res_comp = rge_checker.compare_gtprge_rio(['RGE_NUM'], ['RGE_CODE'], cols, draw_map=True)
+    res_comp = st_checker.compare_registry_gen(['STATION_CODE'], ['STATION_CODE'], cols, draw_map=True)
     # result of the update
-    res_upd = rge_checker.update_gtprge(res_comp['dict_rio'], res_comp['result_mask_dict'],
-                                        res_comp['matched_rows_mask'], 'i.zemskov@skmmp.com')
-    spreadsheet_path = r'D:\Work\dict_checker\data\hdbk_326.xlsx'
-    to_spreadsheet(res_upd, spreadsheet_path, 'GTPRGE_GEN')
+    #res_upd = st_checker.update_gtprge(res_comp['dict_rio'], res_comp['result_mask_dict'],
+                                        #res_comp['matched_rows_mask'], 'i.zemskov@skmmp.com')
+    #spreadsheet_path = r'D:\Work\dict_checker\data\hdbk_326.xlsx'
+    # to_spreadsheet(res_upd, spreadsheet_path, 'GTPRGE_GEN')
     logging.info('Finish!')

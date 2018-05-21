@@ -1,18 +1,2 @@
-updaters.py[LINE:446]# INFO     [2018-05-21 18:09:15,595]  
+updaters.py[LINE:533]# INFO     [2018-05-21 18:20:21,390]  
 Starting...
-updaters.py[LINE:78]# INFO     [2018-05-21 18:09:20,185]  Executing query...
-updaters.py[LINE:81]# INFO     [2018-05-21 18:09:21,171]  Executing finished!
-updaters.py[LINE:355]# INFO     [2018-05-21 18:09:21,713]  
-Initial number of rows in dict_gtprge_gen: 1632 
-Initial number of rows in rio_data: 1535 
-429 fully matched rows were found. 
-0 new rows were added. 
-0 of them are with updated params. 
-0 of them are with new RGEs. 
-In 0 of rows station_name was updated. 
-In 1042 some differences were found, but were ignored determinately. 
-List of newly added RGEs, that are not found in RIO data: [] 
-Number of rows in updated part of dict_gtprge_gen: 1471 
-Total number of rows in updated dict_gtprge_gen: 1632
-
-updaters.py[LINE:456]# INFO     [2018-05-21 18:09:44,991]  Finish!
