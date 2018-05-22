@@ -181,6 +181,9 @@ class RgeDictUpdater:
 
     def update_gtprge(self, df, by_col_mask, matched_mask, author):
 
+        # TODO: make mechanism, that handles cases when there are some rows in dict_data, that weren't found in
+        # TODO: rio_data, analogous to registry_gen class
+
         """
         Updates the dict_gtprge_gen dictionary with respect to RIO data and new RGEs from res_rge
             table from RSV imitator database, scheme model1. Uses results from the compare_gtprge_rio method.
@@ -231,7 +234,7 @@ class RgeDictUpdater:
         # other rows
         other_rows = df.iloc[np.array(by_col_mask.get('STATION_CODE')) &
                              np.array(by_col_mask.get('GTP_CODE'))
-                             & by_col_mask.get('STATION_NAME') & np.logical_not(matched_mask)]
+                             & np.array(by_col_mask.get('STATION_NAME')) & np.logical_not(matched_mask)]
 
         num_rows = unmatched_codes_rows.shape[0] + unmatched_names_rows.shape[0] \
                    + matched_rows.shape[0] + other_rows.shape[0]
@@ -368,7 +371,6 @@ class RgeDictUpdater:
 
 
 class RegistryGenUpdater:
-
     """Class for checking 'dict_registry_gen' table for updates."""
 
     def __init__(self, rio_path, dict_path, begin_date, end_date,
@@ -401,18 +403,38 @@ class RegistryGenUpdater:
 
     def compare_registry_gen(self, left_on, right_on, comp_cols, draw_map=False):
 
+        """
+        Compares rows for each rge in dict with rge rows in RIO and finds mismatches in values of fields
+            for the columns ['STATION_NAME', 'TRADER_CODE', 'TRADER_NAME']
+        :param left_on:
+        :param right_on:
+        :param comp_cols:
+        :param draw_map:
+        :return: dictionary with merged (dict + RIO) dataframe and various masks of matching:
+                    result_mask_dict - mask of matchings by compared columns,
+                    matched_rows_mask - mask of rows with total matching by compared columns
+                    unmatched_rows_mask - logical NOT, applied to matched_rows_mask
+                    not_found_in_rio - rows in dict_data, that weren't found in rio
+        """
+
         # select only actual information
         actual_dict_rows = self.dict_data[self.dict_data.DATE_TO.isnull()]
 
         # merge two datasets
         dict_rio = actual_dict_rows.merge(right=self.rio_data, left_on=left_on, right_on=right_on,
                                           how='left', suffixes=('_DICT', '_RIO')).sort_values(by=left_on)
-        # dict_rio = dict_rio.drop(right_on, axis=1)
+
+        # select rows, that weren't found in rio_data
+        not_found_in_rio = dict_rio[dict_rio['TRADER_CODE_RIO'].isna()]
+
+        # select only rows with STATION_CODE, that is found in rio_data
+        dict_rio = dict_rio[dict_rio['TRADER_CODE_RIO'].notna()]
 
         # check if merging was OK
-        assert (actual_dict_rows.shape[0] == dict_rio.shape[0])
+        print(f'{dict_rio.shape[0]} + {not_found_in_rio.shape[0]} = {actual_dict_rows.shape[0]}')
+        assert (actual_dict_rows.shape[0] == dict_rio.shape[0] + not_found_in_rio.shape[0])
 
-        # check for duplicate RGE codes
+        # check for duplicate station codes
         assert (len(pd.unique(dict_rio.STATION_CODE)) == dict_rio.shape[0])
 
         # obtaining map of unmatched fields
@@ -433,6 +455,11 @@ class RegistryGenUpdater:
 
         try:
             assert (np.sum(unmatched_rows_mask) + np.sum(matched_rows_mask) == result_mask.shape[1])
+            assert (np.sum(unmatched_rows_mask) == np.sum(np.logical_not(np.array(result_mask_dict['STATION_NAME'])) |
+                                                          np.logical_not(np.array(result_mask_dict['TRADER_CODE'])) |
+                                                          np.logical_not(np.array(result_mask_dict['TRADER_NAME']))))
+            assert (dict_rio.shape[0] == np.sum(unmatched_rows_mask) + np.sum(matched_rows_mask))
+
         except AssertionError:
             logging.info('Sum of matched and unmatched rows is not equal to the total number of rows compared!')
             traceback.print_exc()
@@ -449,14 +476,19 @@ class RegistryGenUpdater:
         result = {'result_mask_dict': result_mask_dict,
                   'matched_rows_mask': matched_rows_mask,
                   'unmatched_rows_mask': unmatched_rows_mask,
-                  'dict_rio': dict_rio}
+                  'dict_rio': dict_rio,
+                  'not_found_in_rio': not_found_in_rio}
 
         return result
 
-    def update_registry_gen(self):
+    def update_registry_gen(self, df, nf_df, by_col_mask, matched_mask, author):
 
         """
-        TODO: Fill docstring
+
+        :param df:
+        :param by_col_mask:
+        :param matched_mask:
+        :param author:
         :return:
         """
 
@@ -507,21 +539,166 @@ class RegistryGenUpdater:
                 logging.info(f"Тип станции '{st_name}' не опрелелен")
                 return 0
 
+        out_cols = ['TRADER_CODE', 'TRADER_NAME', 'STATION_CODE',
+                    'STATION_NAME', 'STATION_TYPE', 'HOLDING', 'CODE',
+                    'DATE_FROM', 'DATE_TO', 'AUTHOR', 'STATE', 'DATE_MODIFIED', 'COMMENT']
+
+        src_cols = ['TRADER_CODE_DICT', 'TRADER_NAME_DICT', 'STATION_CODE',
+                    'STATION_NAME_DICT', 'STATION_TYPE', 'HOLDING', 'CODE',
+                    'DATE_FROM', 'DATE_TO', 'AUTHOR', 'STATE', 'DATE_MODIFIED', 'COMMENT']
+
+        # condition 1
+        unmatched_codes_rows = df.iloc[np.logical_not(np.array(by_col_mask.get('TRADER_CODE')))]
+
+        # condition 2
+        unmatched_names_rows = df.iloc[(np.logical_not(by_col_mask.get('STATION_NAME')) |
+                                        np.logical_not(by_col_mask.get('TRADER_NAME'))) &
+                                       np.array(by_col_mask.get('TRADER_CODE'))]
+
+        # condition 3
+        matched_rows = df.iloc[matched_mask]
+
+        # other rows
+        other_rows = df.iloc[np.array(by_col_mask.get('TRADER_CODE')) &
+                             np.array(by_col_mask.get('TRADER_NAME')) &
+                             np.array(by_col_mask.get('STATION_NAME')) & np.logical_not(matched_mask)]
+
+        num_rows = unmatched_codes_rows.shape[0] + unmatched_names_rows.shape[0] \
+                        + matched_rows.shape[0] + other_rows.shape[0]
+
+        # rows, that weren't found in rio_data
+        not_found_rows = nf_df[['TRADER_CODE_DICT', 'TRADER_NAME_DICT', 'STATION_CODE',
+                                'STATION_NAME_DICT', 'STATION_TYPE', 'HOLDING', 'CODE',
+                                'DATE_FROM', 'DATE_TO', 'AUTHOR', 'STATE', 'DATE_MODIFIED', 'COMMENT']]
+        not_found_rows.columns = out_cols
+
+        # check if something is wrong with logic of comparison vectors
+        assert (num_rows == df.shape[0])
+
+        # manage with 1st-condition rows if exist
+        if not unmatched_codes_rows.empty:
+            old_rows = unmatched_codes_rows[['TRADER_CODE_DICT', 'TRADER_NAME_DICT', 'STATION_CODE',
+                                             'STATION_NAME_DICT', 'STATION_TYPE', 'HOLDING', 'CODE',
+                                             'DATE_FROM', 'DATE_TO', 'AUTHOR', 'STATE', 'DATE_MODIFIED', 'COMMENT']]
+
+            # update value of the date_to field
+            old_rows['DATE_TO'] = pd.to_datetime(date.today().replace(day=1).isoformat())
+
+            new_rows = unmatched_codes_rows[['TRADER_CODE_RIO', 'TRADER_NAME_RIO', 'STATION_CODE',
+                                             'STATION_NAME_RIO', 'STATION_TYPE', 'HOLDING', 'CODE',
+                                             'DATE_FROM', 'DATE_TO', 'AUTHOR', 'STATE', 'DATE_MODIFIED', 'COMMENT']]
+
+            # update holding fields with respect to new trader_code and trader_name
+            miss = new_rows[['TRADER_CODE_RIO', 'TRADER_NAME_RIO']].drop_duplicates().set_index('TRADER_CODE_RIO'). \
+                to_dict().get('TRADER_NAME_RIO')
+            holding_tcode_dict = retrieve_holding_info(self.dict_data[['TRADER_CODE', 'TRADER_NAME', 'HOLDING', 'CODE']]
+                                                       .drop_duplicates(), miss)
+            new_rows['CODE'] = new_rows.TRADER_CODE_RIO.map(lambda t: holding_tcode_dict.get(t)[1])
+            new_rows['HOLDING'] = new_rows.TRADER_CODE_RIO.map(lambda t: holding_tcode_dict.get(t)[0])
+
+            # update value of the day_ahead_type field
+            new_rows['DATE_FROM'] = pd.to_datetime(date.today().replace(day=1).isoformat())
+            new_rows['DATE_TO'] = np.NaN
+            new_rows['AUTHOR'] = author
+
+            # generate comments by changes in specified fields
+            new_rows['COMMENT'] = unmatched_codes_rows[['TRADER_CODE_DICT']]
+
+            old_rows.columns = out_cols
+            new_rows.columns = out_cols
+
+            # check that number of rows in old_rows and new_rows
+            assert (old_rows.shape[0] == new_rows.shape[0])
+
+            unmatched_codes_fixed = pd.concat([old_rows, new_rows], axis=0)
+            # unmatched_codes_fixed.columns = out_cols
+            logging.info(f'{unmatched_codes_fixed.shape[0] - unmatched_codes_rows.shape[0]} rows were added!')
+
+        else:
+
+            unmatched_codes_fixed = pd.DataFrame(columns=out_cols)
+
+        # manage with 2nd-condition rows if exist: take station_name from rio column
+        if not unmatched_names_rows.empty:
+            unmatched_names_fixed = unmatched_names_rows[['TRADER_CODE_RIO', 'TRADER_NAME_RIO', 'STATION_CODE',
+                                                          'STATION_NAME_RIO', 'STATION_TYPE', 'HOLDING', 'CODE',
+                                                          'DATE_FROM', 'DATE_TO', 'AUTHOR', 'STATE', 'DATE_MODIFIED',
+                                                          'COMMENT']]
+            unmatched_names_fixed.columns = out_cols
+        else:
+            unmatched_names_fixed = pd.DataFrame(columns=out_cols)
+
+        # finally, manage with matched rows
+        matched_rows = matched_rows[src_cols]
+        matched_rows.columns = out_cols
+
+        # manage with other rows
+        other_rows = other_rows[src_cols]
+        other_rows.columns = out_cols
+
         rio_stations = list(pd.unique(self.rio_data.STATION_CODE))
         dict_stations = list(pd.unique(self.dict_data.STATION_CODE))
         missing_stations = [st for st in rio_stations if st not in dict_stations]
-        # data from rio for the missing (in dict_data) stations
-        df = self.rio_data[self.rio_data.STATION_CODE.isin(missing_stations)] \
-            .filter(items=['TRADER_CODE', 'TRADER_NAME', 'STATION_CODE', 'STATION_NAME'], axis=1) \
-            .drop_duplicates()
-        # generate STATION_TYPE variable
-        df['STATION_TYPE'] = df.STATION_NAME.map(extract_station_type)
-        miss = df[['TRADER_CODE', 'TRADER_NAME']].drop_duplicates().set_index('TRADER_CODE'). \
-            to_dict().get('TRADER_NAME')
-        holding_tcode_dict = retrieve_holding_info(self.dict_data[['TRADER_CODE', 'TRADER_NAME', 'HOLDING', 'CODE']]
-                                                   .drop_duplicates(), miss)
-        df['HOLDING'] = df.TRADER_CODE.map(lambda t: holding_tcode_dict.get(t)[0])
-        df['CODE'] = df.TRADER_CODE.map(lambda t: holding_tcode_dict.get(t)[1])
+        if missing_stations:
+            # data from rio for the missing (in dict_data) stations
+            new_stations_fixed = self.rio_data[self.rio_data.STATION_CODE.isin(missing_stations)] \
+                .filter(items=['TRADER_CODE', 'TRADER_NAME', 'STATION_CODE', 'STATION_NAME'], axis=1) \
+                .drop_duplicates()
+            # generate STATION_TYPE variable
+            new_stations_fixed['STATION_TYPE'] = new_stations_fixed.STATION_NAME.map(extract_station_type)
+            miss = new_stations_fixed[['TRADER_CODE', 'TRADER_NAME']].drop_duplicates().set_index('TRADER_CODE'). \
+                to_dict().get('TRADER_NAME')
+            holding_tcode_dict = retrieve_holding_info(self.dict_data[['TRADER_CODE', 'TRADER_NAME', 'HOLDING', 'CODE']]
+                                                       .drop_duplicates(), miss)
+            new_stations_fixed['HOLDING'] = new_stations_fixed.TRADER_CODE.map(lambda t: holding_tcode_dict.get(t)[0])
+            new_stations_fixed['CODE'] = new_stations_fixed.TRADER_CODE.map(lambda t: holding_tcode_dict.get(t)[1])
+            new_stations_fixed['DATE_FROM'] = pd.to_datetime(date.today().replace(day=1).isoformat())
+            new_stations_fixed['DATE_TO'] = np.NaN
+            new_stations_fixed['AUTHOR'] = author
+
+        else:
+            new_stations_fixed = pd.DataFrame(columns=out_cols)
+
+        # set column names to lowercase for compatibility with Exergy loader
+        result_df = pd.concat([matched_rows, unmatched_codes_fixed, unmatched_names_fixed,
+                               other_rows, not_found_rows], axis=0) \
+            .sort_values(['STATION_CODE', 'DATE_TO'])
+
+        # select archived data from dict_gtprge_gen (by DATE_TO.notna() condition)
+        archived_dict_rows = self.dict_data[self.dict_data.DATE_TO.notna()]
+        not_actual_rows = archived_dict_rows.shape[0]
+        updated_part_dim = result_df.shape[0]
+        result_df = pd.concat([result_df, archived_dict_rows], axis=0).sort_values(['STATION_CODE', 'DATE_TO'])
+        cols_lower = [c.lower() for c in out_cols]
+        result_df.columns = cols_lower
+        result_df['date_from'] = result_df['date_from'].map(excel_date)
+        result_df['date_to'] = result_df['date_to'].map(excel_date)
+        result_df['date_modified'] = result_df['date_modified'].map(excel_date)
+
+        # check for a constant number of columns
+        assert (self.dict_data.shape[1] == result_df.shape[1])
+
+        # check if sum of numbers of rows in different components of result_df is equal to
+        # number of columns of result_df
+        assert(result_df.shape[0] == not_found_rows.shape[0] + matched_rows.shape[0] + new_rows.shape[0]
+               + old_rows.shape[0] + new_stations_fixed.shape[0] + unmatched_names_fixed.shape[0]
+               + other_rows.shape[0] + not_actual_rows)
+
+        logging.info(f'\nInitial number of rows in dict_registry_gen: {self.dict_data.shape[0]} \n'
+                     f'Initial number of rows in rio_data: {self.rio_data.shape[0]} \n'
+                     f'{not_found_rows.shape[0]} rows of dict_data were not found in rio_data \n'
+                     f'{matched_rows.shape[0]} fully matched rows were found. \n'
+                     f'{new_rows.shape[0] + new_stations_fixed.shape[0]} new rows were added. \n'
+                     f'{new_rows.shape[0]} of them are with updated params. \n'
+                     f'{new_stations_fixed.shape[0]} of them are with new stations. \n'
+                     f'In {unmatched_names_fixed.shape[0]} of rows station_name or trader_name were updated. \n'
+                     f'In {other_rows.shape[0]} some differences were found, but were ignored determinately. \n'
+                     f'{not_actual_rows} rows were initially not actual in dict_data. \n'
+                     f'List of newly added stations, that are not found in RIO data: {missing_stations} \n'
+                     f'Updated part of dict_data has {updated_part_dim} rows. \n'
+                     f'Total number of rows in updated dict_registry_gen: {result_df.shape[0]}\n')
+
+        return result_df
 
 
 if __name__ == "__main__":
@@ -532,12 +709,17 @@ if __name__ == "__main__":
                         level=logging.DEBUG, filename=log_path, filemode='w')
     logging.info('\nStarting...')
     st_checker = RegistryGenUpdater('data/RIO_2018_05.xlsx', 'data/hdbk_326.xlsx', date_from, date_to)
-    cols = ['STATION_CODE', 'STATION_NAME', 'TRADER_CODE', 'TRADER_NAME']
+    cols = ['STATION_NAME', 'TRADER_CODE', 'TRADER_NAME']
     # result of the comparison
     res_comp = st_checker.compare_registry_gen(['STATION_CODE'], ['STATION_CODE'], cols, draw_map=True)
+    print(res_comp['dict_rio'].shape, np.sum(res_comp['matched_rows_mask']) + np.sum(res_comp['unmatched_rows_mask']))
+    result = st_checker.update_registry_gen(res_comp['dict_rio'], res_comp['not_found_in_rio'],
+                                            res_comp['result_mask_dict'], res_comp['matched_rows_mask'],
+                                            'i.zemskov@skmmp.com')
+    print(result.shape)
     # result of the update
-    #res_upd = st_checker.update_gtprge(res_comp['dict_rio'], res_comp['result_mask_dict'],
-                                        #res_comp['matched_rows_mask'], 'i.zemskov@skmmp.com')
-    #spreadsheet_path = r'D:\Work\dict_checker\data\hdbk_326.xlsx'
+    # res_upd = st_checker.update_gtprge(res_comp['dict_rio'], res_comp['result_mask_dict'],
+    # res_comp['matched_rows_mask'], 'i.zemskov@skmmp.com')
+    # spreadsheet_path = r'D:\Work\dict_checker\data\hdbk_326.xlsx'
     # to_spreadsheet(res_upd, spreadsheet_path, 'GTPRGE_GEN')
     logging.info('Finish!')

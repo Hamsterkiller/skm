@@ -1,2 +1,19 @@
-updaters.py[LINE:533]# INFO     [2018-05-21 18:20:21,390]  
+updaters.py[LINE:707]# INFO     [2018-05-22 20:11:08,362]  
 Starting...
+updaters.py[LINE:612]# INFO     [2018-05-22 20:11:13,732]  40 rows were added!
+updaters.py[LINE:684]# INFO     [2018-05-22 20:11:13,775]  
+Initial number of rows in dict_registry_gen: 820 
+Initial number of rows in rio_data: 779 
+2 rows of dict_data were not found in rio_data 
+456 fully matched rows were found. 
+40 new rows were added. 
+40 of them are with updated params. 
+0 of them are with new stations. 
+In 283 of rows station_name or trader_name were updated. 
+In 0 some differences were found, but were ignored determinately. 
+39 rows were initially not actual in dict_data. 
+List of newly added stations, that are not found in RIO data: [] 
+Updated part of dict_data has 821 rows. 
+Total number of rows in updated dict_registry_gen: 860
+
+updaters.py[LINE:722]# INFO     [2018-05-22 20:11:13,775]  Finish!
