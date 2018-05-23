@@ -74,12 +74,13 @@ class RgeDictUpdater:
             :param query: string representing sql query
             :return: rows with information concerning missed RGEs
             """
-
             logging.info('Executing query...')
             engine = create_engine(config.db_conn)
             result = pd.read_sql(query, engine)
             logging.info('Executing finished!')
             return result
+
+
 
         def construct_query():
             """
@@ -134,8 +135,15 @@ class RgeDictUpdater:
                                           how='left', suffixes=('_DICT', '_RIO')).sort_values(by=left_on)
         dict_rio = dict_rio.drop(right_on, axis=1)
 
+        # select rows, that weren't found in rio_data
+        not_found_in_rio = dict_rio[dict_rio['STATION_CODE_RIO'].isna()]
+
+        # select only rows with STATION_CODE, that is found in rio_data
+        dict_rio = dict_rio[dict_rio['STATION_CODE_RIO'].notna()]
+
         # check if merging was OK
-        assert (actual_dict_rows.shape[0] == dict_rio.shape[0])
+        print(f'{dict_rio.shape[0]} + {not_found_in_rio.shape[0]} = {actual_dict_rows.shape[0]}')
+        assert (actual_dict_rows.shape[0] == dict_rio.shape[0] + not_found_in_rio.shape[0])
 
         # check for duplicate RGE codes
         assert (len(pd.unique(dict_rio.RGE_NUM)) == dict_rio.shape[0])
@@ -172,14 +180,15 @@ class RgeDictUpdater:
             plt.tight_layout(rect=[0, 0.03, 1, 0.95])
             plt.savefig(f'C:\\temp\\unmatching_map_{self.begin_date}.png')
 
-        result = {'result_mask_dict': result_mask_dict,
-                  'matched_rows_mask': matched_rows_mask,
-                  'unmatched_rows_mask': unmatched_rows_mask,
-                  'dict_rio': dict_rio}
+        result_dict = {'result_mask_dict': result_mask_dict,
+                       'matched_rows_mask': matched_rows_mask,
+                       'unmatched_rows_mask': unmatched_rows_mask,
+                       'dict_rio': dict_rio,
+                       'not_found_in_rio': not_found_in_rio}
 
-        return result
+        return result_dict
 
-    def update_gtprge(self, df, by_col_mask, matched_mask, author):
+    def update_gtprge(self, df, nf_df, by_col_mask, matched_mask, author):
 
         # TODO: make mechanism, that handles cases when there are some rows in dict_data, that weren't found in
         # TODO: rio_data, analogous to registry_gen class
@@ -224,7 +233,7 @@ class RgeDictUpdater:
                                        np.logical_not(np.array(by_col_mask.get('GTP_CODE')))]
 
         # condition 2
-        unmatched_names_rows = df.iloc[np.logical_not(by_col_mask.get('STATION_NAME')) &
+        unmatched_names_rows = df.iloc[np.logical_not(np.array(by_col_mask.get('STATION_NAME'))) &
                                        np.array(by_col_mask.get('STATION_CODE')) &
                                        np.array(by_col_mask.get('GTP_CODE'))]
 
@@ -235,6 +244,10 @@ class RgeDictUpdater:
         other_rows = df.iloc[np.array(by_col_mask.get('STATION_CODE')) &
                              np.array(by_col_mask.get('GTP_CODE'))
                              & np.array(by_col_mask.get('STATION_NAME')) & np.logical_not(matched_mask)]
+
+        # rows, that weren't found in rio_data
+        not_found_rows = nf_df[src_cols]
+        not_found_rows.columns = out_cols
 
         num_rows = unmatched_codes_rows.shape[0] + unmatched_names_rows.shape[0] \
                    + matched_rows.shape[0] + other_rows.shape[0]
@@ -339,7 +352,8 @@ class RgeDictUpdater:
             missing_rge_data = pd.concat([missing_rge_data, still_missing_data.reset_index()], axis=0)
 
         # set column names to lowercase for compatibility with Exergy loader
-        result_df = pd.concat([matched_rows, unmatched_codes_fixed, unmatched_names_fixed, other_rows], axis=0) \
+        result_df = pd.concat([matched_rows, unmatched_codes_fixed, unmatched_names_fixed,
+                               other_rows, not_found_rows, missing_rge_data], axis=0) \
             .sort_values(['RGE_NUM', 'DATE_TO'])
 
         # select archived data from dict_gtprge_gen (by DATE_TO.notna() condition)
@@ -348,12 +362,19 @@ class RgeDictUpdater:
         result_df = pd.concat([result_df, archived_dict_rows], axis=0)
         cols_lower = [c.lower() for c in out_cols]
         result_df.columns = cols_lower
+        print(result_df.info())
         result_df['date_from'] = result_df['date_from'].map(excel_date)
         result_df['date_to'] = result_df['date_to'].map(excel_date)
         result_df['date_modified'] = result_df['date_modified'].map(excel_date)
 
         # check for a constant number of columns
         assert (self.dict_data.shape[1] == result_df.shape[1])
+
+        # check if sum of numbers of rows in different components of result_df is equal to
+        # number of columns of result_df
+        # assert (result_df.shape[0] == not_found_rows.shape[0] + matched_rows.shape[0] + new_rows.shape[0]
+        #        + old_rows.shape[0] + archived_dict_rows.shape[0] + unmatched_names_fixed.shape[0]
+        #        + other_rows.shape[0])
 
         logging.info(f'\nInitial number of rows in dict_gtprge_gen: {self.dict_data.shape[0]} \n'
                      f'Initial number of rows in rio_data: {self.rio_data.shape[0]} \n'
@@ -363,6 +384,7 @@ class RgeDictUpdater:
                      f'{missing_rge_data.shape[0]} of them are with new RGEs. \n'
                      f'In {unmatched_names_fixed.shape[0]} of rows station_name was updated. \n'
                      f'In {other_rows.shape[0]} some differences were found, but were ignored determinately. \n'
+                     f'{archived_dict_rows.shape[0]} rows were initially not actual in dict_data.. \n'
                      f'List of newly added RGEs, that are not found in RIO data: {still_missing_rges} \n'
                      f'Number of rows in updated part of dict_gtprge_gen: {updated_part} \n'
                      f'Total number of rows in updated dict_gtprge_gen: {result_df.shape[0]}\n')
@@ -564,12 +586,10 @@ class RegistryGenUpdater:
                              np.array(by_col_mask.get('STATION_NAME')) & np.logical_not(matched_mask)]
 
         num_rows = unmatched_codes_rows.shape[0] + unmatched_names_rows.shape[0] \
-                        + matched_rows.shape[0] + other_rows.shape[0]
+                   + matched_rows.shape[0] + other_rows.shape[0]
 
         # rows, that weren't found in rio_data
-        not_found_rows = nf_df[['TRADER_CODE_DICT', 'TRADER_NAME_DICT', 'STATION_CODE',
-                                'STATION_NAME_DICT', 'STATION_TYPE', 'HOLDING', 'CODE',
-                                'DATE_FROM', 'DATE_TO', 'AUTHOR', 'STATE', 'DATE_MODIFIED', 'COMMENT']]
+        not_found_rows = nf_df[src_cols]
         not_found_rows.columns = out_cols
 
         # check if something is wrong with logic of comparison vectors
@@ -680,9 +700,9 @@ class RegistryGenUpdater:
 
         # check if sum of numbers of rows in different components of result_df is equal to
         # number of columns of result_df
-        assert(result_df.shape[0] == not_found_rows.shape[0] + matched_rows.shape[0] + new_rows.shape[0]
-               + old_rows.shape[0] + new_stations_fixed.shape[0] + unmatched_names_fixed.shape[0]
-               + other_rows.shape[0] + not_actual_rows)
+        assert (result_df.shape[0] == not_found_rows.shape[0] + matched_rows.shape[0] + new_rows.shape[0]
+                + old_rows.shape[0] + new_stations_fixed.shape[0] + unmatched_names_fixed.shape[0]
+                + other_rows.shape[0] + not_actual_rows)
 
         logging.info(f'\nInitial number of rows in dict_registry_gen: {self.dict_data.shape[0]} \n'
                      f'Initial number of rows in rio_data: {self.rio_data.shape[0]} \n'
@@ -701,6 +721,29 @@ class RegistryGenUpdater:
         return result_df
 
 
+# if __name__ == "__main__":
+#     date_from = date(2018, 5, 1)
+#     date_to = date(2018, 5, 1)
+#     log_path = os.path.join(os.getcwd(), 'dict_checker_logs')
+#     logging.basicConfig(format=u'%(filename)s[LINE:%(lineno)d]# %(levelname)-8s [%(asctime)s]  %(message)s',
+#                         level=logging.DEBUG, filename=log_path, filemode='w')
+#     logging.info('\nStarting...')
+#     st_checker = RegistryGenUpdater('data/RIO_2018_05.xlsx', 'data/hdbk_326.xlsx', date_from, date_to)
+#     cols = ['STATION_NAME', 'TRADER_CODE', 'TRADER_NAME']
+#     # result of the comparison
+#     res_comp = st_checker.compare_registry_gen(['STATION_CODE'], ['STATION_CODE'], cols, draw_map=True)
+#     print(res_comp['dict_rio'].shape, np.sum(res_comp['matched_rows_mask']) + np.sum(res_comp['unmatched_rows_mask']))
+#     result = st_checker.update_registry_gen(res_comp['dict_rio'], res_comp['not_found_in_rio'],
+#                                             res_comp['result_mask_dict'], res_comp['matched_rows_mask'],
+#                                             'i.zemskov@skmmp.com')
+#     print(result.shape)
+#     # result of the update
+#     # res_upd = st_checker.update_gtprge(res_comp['dict_rio'], res_comp['result_mask_dict'],
+#     # res_comp['matched_rows_mask'], 'i.zemskov@skmmp.com')
+#     # spreadsheet_path = r'D:\Work\dict_checker\data\hdbk_326.xlsx'
+#     # to_spreadsheet(res_upd, spreadsheet_path, 'GTPRGE_GEN')
+#     logging.info('Finish!')
+
 if __name__ == "__main__":
     date_from = date(2018, 5, 1)
     date_to = date(2018, 5, 1)
@@ -708,12 +751,12 @@ if __name__ == "__main__":
     logging.basicConfig(format=u'%(filename)s[LINE:%(lineno)d]# %(levelname)-8s [%(asctime)s]  %(message)s',
                         level=logging.DEBUG, filename=log_path, filemode='w')
     logging.info('\nStarting...')
-    st_checker = RegistryGenUpdater('data/RIO_2018_05.xlsx', 'data/hdbk_326.xlsx', date_from, date_to)
-    cols = ['STATION_NAME', 'TRADER_CODE', 'TRADER_NAME']
+    rge_checker = RgeDictUpdater('data/RIO_2018_05.xlsx', 'data/hdbk_326.xlsx', date_from, date_to)
+    cols = ['STATION_CODE', 'STATION_NAME', 'GTP_CODE', 'GTP_NAME', 'RGE_NAME']
     # result of the comparison
-    res_comp = st_checker.compare_registry_gen(['STATION_CODE'], ['STATION_CODE'], cols, draw_map=True)
+    res_comp = rge_checker.compare_gtprge_rio(['RGE_NUM'], ['RGE_CODE'], cols, draw_map=True)
     print(res_comp['dict_rio'].shape, np.sum(res_comp['matched_rows_mask']) + np.sum(res_comp['unmatched_rows_mask']))
-    result = st_checker.update_registry_gen(res_comp['dict_rio'], res_comp['not_found_in_rio'],
+    result = rge_checker.update_gtprge(res_comp['dict_rio'], res_comp['not_found_in_rio'],
                                             res_comp['result_mask_dict'], res_comp['matched_rows_mask'],
                                             'i.zemskov@skmmp.com')
     print(result.shape)
