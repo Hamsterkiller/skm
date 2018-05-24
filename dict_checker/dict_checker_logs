@@ -1,9 +1,9 @@
-updaters.py[LINE:826]# INFO     [2018-05-23 15:54:50,382]  
+updaters.py[LINE:835]# INFO     [2018-05-24 09:52:57,593]  
 Starting...
-updaters.py[LINE:634]# INFO     [2018-05-23 15:54:55,699]  Newly found holdings: 
+updaters.py[LINE:634]# INFO     [2018-05-24 09:53:03,315]  Newly found holdings: 
 {'MRSKSEVZ': ('ПАО "МРСК Северо-Запада"', 'MRSKSEVZ'), 'RNENERGO': ('ПАО «Интер РАО»', 'INT'), 'MRSKSIBR': ('ПАО "МРСК Сибири"', 'MRSKSIBR'), 'KARELENE': ('ПАО ГК «ТНС энерго»', 'TNS'), 'ENERGOPK': ('ЗАО "ЭПК"', 'EPK'), 'SVERDGAZ': ('АО "СЭГК"', 'SVERDGAZ'), 'TEKENERG': ('ООО "ТЭК-Энерго"', 'TEK'), 'CHIMPROM': ('ПАО "Химпром"', 'CHIMPROM'), 'NOVSLTEC': ('ООО "НСТЭЦ"', 'NOVSLTEC'), 'TELMAGES': ('ООО "ЕвроСибЭнерго-Гидрогенерация"', 'TELMAGES'), 'PERMENER': ('ПАО "Пермэнергосбыт"', 'PER'), 'VOLTEPLG': ('ООО "Волгодонская тепловая генерация"', 'VOLTEPLG'), 'SAMARAEN': ('ПАО "Самараэнерго"', 'SAM'), 'MAGNENKO': ('ООО "МЭК"', 'MEK'), 'ORENBENE': ('ПАО «Т ПЛЮС»', 'PLYU'), 'RYAZENER': ('ПАО "РЭСК" (г.Рязань)', 'RESK'), 'MOSENERG': ('ПАО «Интер РАО»', 'INT'), 'KALMENER': ('АО "Калмэнергосбыт"', 'KALMENER'), 'ROSTOVEN': ('ПАО ГК «ТНС энерго»', 'TNS'), 'MORDOVEN': ('ПАО "Мордовская энергосбытовая компания"', 'MOR'), 'ZAOESNKB': ('НК "Роснефть"', 'OSN'), 'GRACHSES': ('ООО "ГРАЧЕВСКАЯ СЭС"', 'GRACHSES'), 'BUGULSES': ('ООО "Бугульчанская СЭС"', 'BUGULSES'), 'PLESHSES': ('ООО "ПЛЕШАНОВСКАЯ СЭС"', 'PLESHSES'), 'VOLGOGEN': ('ПАО "Волгоградэнергосбыт"', 'VOL'), 'TGVOLSCH': ('ООО "Тепловая генерация г. Волжского"', 'TGVOLSCH')}
-updaters.py[LINE:654]# INFO     [2018-05-23 15:54:55,881]  40 rows were added!
-updaters.py[LINE:726]# INFO     [2018-05-23 15:54:55,923]  
+updaters.py[LINE:654]# INFO     [2018-05-24 09:53:03,496]  40 rows were added!
+updaters.py[LINE:726]# INFO     [2018-05-24 09:53:03,538]  
 Initial number of rows in dict_registry_gen: 820 
 Initial number of rows in rio_data: 779 
 2 rows of dict_data were not found in rio_data 
@@ -18,10 +18,10 @@ List of newly added stations, that are not found in RIO data: []
 Updated part of dict_data has 821 rows. 
 Total number of rows in updated dict_registry_gen: 860
 
-updaters.py[LINE:777]# INFO     [2018-05-23 15:55:04,558]  Start updating holdings info...
-updaters.py[LINE:812]# INFO     [2018-05-23 15:55:04,567]  135 rows were in initial data. 
+updaters.py[LINE:786]# INFO     [2018-05-24 09:53:12,138]  Start updating holdings info...
+updaters.py[LINE:821]# INFO     [2018-05-24 09:53:12,146]  135 rows were in initial data. 
 135 actual rows were in initial data. 
 0 new holding rows were added. 
 135 are in updated holdings data. 
 
-updaters.py[LINE:845]# INFO     [2018-05-23 15:55:28,587]  Finish!
+updaters.py[LINE:854]# INFO     [2018-05-24 09:53:35,682]  Finish!
