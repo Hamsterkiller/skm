@@ -149,6 +149,9 @@ class RgeDictUpdater:
         # select rows, that weren't found in rio_data
         not_found_in_rio = dict_rio[dict_rio['STATION_CODE_RIO'].isna()]
 
+        # log number of not-found rows
+        logging.info(f'{not_found_in_rio.shape[0]} RGEs were not found in RIO')
+
         # select only rows with STATION_CODE, that is found in rio_data
         dict_rio = dict_rio[dict_rio['STATION_CODE_RIO'].notna()]
 
@@ -824,52 +827,3 @@ class HoldingsUpdater:
                      f'{result_holdings.shape[0]} are in updated holdings data. \n')
 
         return result_holdings
-
-
-if __name__ == "__main__":
-    date_from = date(2018, 5, 1)
-    date_to = date(2018, 5, 1)
-    log_path = os.path.join(os.getcwd(), 'dict_checker_logs')
-    logging.basicConfig(format=u'%(filename)s[LINE:%(lineno)d]# %(levelname)-8s [%(asctime)s]  %(message)s',
-                        level=logging.DEBUG, filename=log_path, filemode='w')
-    logging.info('\nStarting...')
-    st_checker = RegistryGenUpdater('data/RIO_2018_05.xlsx', 'data/hdbk_326_initial.xlsx', date_from, date_to)
-    cols = ['STATION_NAME', 'TRADER_CODE', 'TRADER_NAME']
-    # result of the comparison
-    res_comp = st_checker.compare_registry_gen(['STATION_CODE'], ['STATION_CODE'], cols, draw_map=True)
-    print(res_comp['dict_rio'].shape, np.sum(res_comp['matched_rows_mask']) + np.sum(res_comp['unmatched_rows_mask']))
-    result = st_checker.update_registry_gen(res_comp['dict_rio'], res_comp['not_found_in_rio'],
-                                            res_comp['result_mask_dict'], res_comp['matched_rows_mask'],
-                                            'i.zemskov@skmmp.com')
-    print(result.shape)
-
-    # update excel dictionary
-    spreadsheet_path = r'D:\Work\dict_checker\data\hdbk_326.xlsx'
-    #to_spreadsheet(result, spreadsheet_path, 'REGISTRY_GEN')
-
-    # update holdings info
-    hold_checker = HoldingsUpdater('data/hdbk_326.xlsx', 'REGISTRY_GEN', 'HOLDINGS')
-    res_hold = hold_checker.update_holdings_info('i.zemskov@skmmp.com')
-    to_spreadsheet(res_hold, spreadsheet_path, 'HOLDINGS')
-    logging.info('Finish!')
-#
-# if __name__ == "__main__":
-#     date_from = date(2018, 5, 1)
-#     date_to = date(2018, 5, 1)
-#     log_path = os.path.join(os.getcwd(), 'dict_checker_logs')
-#     logging.basicConfig(format=u'%(filename)s[LINE:%(lineno)d]# %(levelname)-8s [%(asctime)s]  %(message)s',
-#                         level=logging.DEBUG, filename=log_path, filemode='w')
-#     logging.info('\nStarting...')
-#     rge_checker = RgeDictUpdater('data/RIO_2018_05.xlsx', 'data/hdbk_326.xlsx', date_from, date_to)
-#     cols = ['STATION_CODE', 'STATION_NAME', 'GTP_CODE', 'GTP_NAME', 'RGE_NAME']
-#     # result of the comparison
-#     res_comp = rge_checker.compare_gtprge_rio(['RGE_NUM'], ['RGE_CODE'], cols, draw_map=True)
-#     print(res_comp['dict_rio'].shape, np.sum(res_comp['matched_rows_mask']) + np.sum(res_comp['unmatched_rows_mask']))
-#     result = rge_checker.update_gtprge(res_comp['dict_rio'], res_comp['not_found_in_rio'],
-#                                             res_comp['result_mask_dict'], res_comp['matched_rows_mask'],
-#                                             'i.zemskov@skmmp.com')
-#     print(result.shape)
-#     # result of the update
-#     #spreadsheet_path = r'D:\Work\dict_checker\data\hdbk_326.xlsx'
-#     #to_spreadsheet(result, spreadsheet_path, 'GTPRGE_GEN')
-#     logging.info('Finish!')

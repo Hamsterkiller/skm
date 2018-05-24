@@ -43,8 +43,6 @@ def to_spreadsheet(df, workbook_path, sheet_name):
     :param sheet_name: name of the target sheet
     """
 
-    print('Start writing...')
-
     book = load_workbook(workbook_path)
     writer = pd.ExcelWriter(workbook_path, engine='openpyxl')
     writer.book = book
@@ -52,6 +50,8 @@ def to_spreadsheet(df, workbook_path, sheet_name):
     df.to_excel(writer, sheet_name=sheet_name, index=False)
     writer.save()
     writer.close()
+
+
 
 
 def from_ts_to_date(ts):
