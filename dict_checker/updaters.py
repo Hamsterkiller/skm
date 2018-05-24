@@ -742,6 +742,8 @@ class RegistryGenUpdater:
 
 class HoldingsUpdater:
 
+    """ Encapsulates functions for updating holding information of dictionary """
+
     def __init__(self, dict_path, registry_sheet, holdings_sheet):
 
         """TODO
@@ -787,14 +789,18 @@ class HoldingsUpdater:
         # select all new rows
         holdings_new = reg_hold_holdings[reg_hold_holdings.isnull().any(axis=1)][['HOLDING_REG', 'CODE']]\
             .rename(index=str, columns={'HOLDING_REG': 'HOLDING'})
-        holdings_new['DATE_FROM'] = pd.to_datetime(date.today().replace(day=1).isoformat())
-        holdings_new['DATE_TO'] = np.NaN
-        holdings_new['AUTHOR'] = author
-        holdings_new['STATE'] = 3
-        holdings_new['DATE_MODIFIED'] = pd.to_datetime(date.today().replace(day=1).isoformat())
-        holdings_new['COMMENT'] = ''
+        print(holdings_new.shape[0])
+        if holdings_new.empty:
+            holdings_new = pd.DataFrame(columns=[c.upper() for c in self.init_cols])
+        else:
+            holdings_new['DATE_FROM'] = pd.to_datetime(date.today().replace(day=1).isoformat())
+            holdings_new['DATE_TO'] = np.NaN
+            holdings_new['AUTHOR'] = author
+            holdings_new['STATE'] = 3
+            holdings_new['DATE_MODIFIED'] = pd.to_datetime(date.today().replace(day=1).isoformat())
+            holdings_new['COMMENT'] = ''
 
-        result_holdings = pd.concat([hold_holdings, holdings_new], axis=0)
+        result_holdings = pd.concat([holdings_data, holdings_new], axis=0)
 
         # check for equality in column dimension
         assert(result_holdings.shape[1] == holdings_data.shape[1])
@@ -830,12 +836,12 @@ if __name__ == "__main__":
 
     # update excel dictionary
     spreadsheet_path = r'D:\Work\dict_checker\data\hdbk_326.xlsx'
-    # to_spreadsheet(result, spreadsheet_path, 'REGISTRY_GEN')
+    #to_spreadsheet(result, spreadsheet_path, 'REGISTRY_GEN')
 
     # update holdings info
     hold_checker = HoldingsUpdater('data/hdbk_326.xlsx', 'REGISTRY_GEN', 'HOLDINGS')
     res_hold = hold_checker.update_holdings_info('i.zemskov@skmmp.com')
-    # to_spreadsheet(res_hold, spreadsheet_path, 'HOLDINGS')
+    to_spreadsheet(res_hold, spreadsheet_path, 'HOLDINGS')
     logging.info('Finish!')
 #
 # if __name__ == "__main__":
