@@ -746,7 +746,11 @@ class HoldingsUpdater:
 
     def __init__(self, dict_path, registry_sheet, holdings_sheet):
 
-        """TODO
+        """
+        Constructor
+        :param dict_path: path to the dictionary excel file
+        :param registry_sheet: name of the sheet with registry_gen data
+        :param holdings_sheet: name of sheet with holdings data
         """
 
         self.dict_path = dict_path
@@ -756,7 +760,9 @@ class HoldingsUpdater:
 
     def __load_data(self):
 
-        """TODO
+        """
+        Loads data from the specified file paths
+        :return: pandas data frames with loaded data
         """
 
         registry_data = pd.read_excel(self.dict_path, sheet_name=self.registry_sheet)
@@ -771,7 +777,10 @@ class HoldingsUpdater:
 
     def update_holdings_info(self, author):
 
-        """TODO
+        """
+        Updates data of holdings from dictionary
+        :param author: str with author of changes name
+        :return: updated data
         """
 
         logging.info('Start updating holdings info...')
