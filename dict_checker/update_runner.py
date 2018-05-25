@@ -52,17 +52,20 @@ if __name__ == "__main__":
 
     # compare registry_gen dictionary and data in RIO file
     logging.info('Starting REGISTRY_GEN dict comparison ...')
-    res_comp = registry_gen_updater.compare_registry_gen(['STATION_CODE'], ['STATION_CODE'],
-                                                         cols_registry, draw_map=True)
+    res_comp_registry = registry_gen_updater.compare_registry_gen(['STATION_CODE'], ['STATION_CODE'],
+                                                                  cols_registry, draw_map=True)
     logging.info('Comparison of REGISTRY_GEN data is finished ...')
 
     # update REGISTRY_GEN dictionary
-    result_registry = registry_gen_updater.compare_registry_gen(['STATION_CODE'], ['STATION_CODE'],
-                                                                cols_registry, draw_map=True)
+    result_registry = registry_gen_updater.update_registry_gen(res_comp_registry['dict_rio'],
+                                                               res_comp_registry['not_found_in_rio'],
+                                                               res_comp_registry['result_mask_dict'],
+                                                               res_comp_registry['matched_rows_mask'],
+                                                               'i.zemskov@skmmp.com')
 
     # update excel file with dictionary
     logging.info('Start updating REGISTRY_GEN sheet in excel file...')
-    to_spreadsheet(result_rge, dict_path_upd, 'REGISTRY_GEN')
+    to_spreadsheet(result_registry, dict_path_upd, 'REGISTRY_GEN')
     logging.info('Updating of REGISTRY_GEN sheet is finished.')
 
     # create instance of the REGISTRY_GEN updater

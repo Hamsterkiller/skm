@@ -44,14 +44,18 @@ def to_spreadsheet(df, workbook_path, sheet_name):
     """
 
     book = load_workbook(workbook_path)
+    sheet = book[sheet_name]
+    index = book.index(sheet)
+    book.remove(sheet)
+    book.create_sheet(sheet_name, index)
     writer = pd.ExcelWriter(workbook_path, engine='openpyxl')
     writer.book = book
     writer.sheets = dict((ws.title, ws) for ws in book.worksheets)
+
+    # export data to recreated worksheet
     df.to_excel(writer, sheet_name=sheet_name, index=False)
     writer.save()
     writer.close()
-
-
 
 
 def from_ts_to_date(ts):

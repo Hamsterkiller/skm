@@ -15,11 +15,23 @@
       <file leaf-file-name="updaters.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/updaters.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="206">
-              <caret line="281" column="48" selection-start-line="281" selection-start-column="34" selection-end-line="281" selection-end-column="48" />
+            <state relative-caret-position="1563">
+              <caret line="290" column="45" selection-start-line="290" selection-start-column="45" selection-end-line="290" selection-end-column="45" />
               <folding>
                 <element signature="e#127#146#0" expanded="true" />
+                <element signature="e#20309#20575#0" />
+                <element signature="e#20613#21228#0" />
+                <element signature="e#21321#25269#0" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="dict_checker_logs" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/dict_checker_logs">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="229">
+              <caret line="46" column="19" selection-start-line="46" selection-start-column="19" selection-end-line="46" selection-end-column="19" />
             </state>
           </provider>
         </entry>
@@ -27,8 +39,8 @@
       <file leaf-file-name="update_runner.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/update_runner.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="237">
-              <caret line="23" column="33" lean-forward="true" selection-start-line="23" selection-start-column="33" selection-end-line="23" selection-end-column="33" />
+            <state relative-caret-position="470">
+              <caret line="63" column="63" selection-start-line="63" selection-start-column="63" selection-end-line="63" selection-end-column="63" />
               <folding>
                 <element signature="e#201#273#0" expanded="true" />
               </folding>
@@ -39,8 +51,11 @@
       <file leaf-file-name="aux_functions.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/aux_functions.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="311">
-              <caret line="43" column="7" selection-start-line="43" selection-start-column="7" selection-end-line="43" selection-end-column="7" />
+            <state relative-caret-position="509">
+              <caret line="57" column="18" selection-start-line="57" selection-start-column="18" selection-end-line="57" selection-end-column="18" />
+              <folding>
+                <element signature="e#87#121#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -75,7 +90,6 @@
       <find>retrieve_holding_info</find>
       <find>isna</find>
       <find>any</find>
-      <find>print</find>
       <find>info</find>
       <find>info()</find>
       <find>holding_tcode_dict</find>
@@ -85,6 +99,7 @@
       <find>merge</find>
       <find>empty</find>
       <find>day_ahead_type</find>
+      <find>print</find>
     </findStrings>
   </component>
   <component name="IdeDocumentHistory">
@@ -95,13 +110,13 @@
         <option value="$PROJECT_DIR$/ckeckers.py" />
         <option value="$PROJECT_DIR$/checkers.py" />
         <option value="$PROJECT_DIR$/logger.py" />
+        <option value="$PROJECT_DIR$/update_runner.py" />
         <option value="$PROJECT_DIR$/aux_functions.py" />
         <option value="$PROJECT_DIR$/updaters.py" />
-        <option value="$PROJECT_DIR$/update_runner.py" />
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds" extendedState="7">
+  <component name="ProjectFrameBounds" extendedState="6">
     <option name="x" value="1912" />
     <option name="y" value="-8" />
     <option name="width" value="1936" />
@@ -237,7 +252,6 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="1912" y="-8" width="1936" height="1056" extended-state="6" />
-    <editor active="true" />
     <layout>
       <window_info anchor="right" id="Palette" order="3" />
       <window_info anchor="bottom" id="TODO" order="6" sideWeight="0.49946696" weight="0.2342048" />
@@ -281,6 +295,9 @@
           <caret line="36" column="11" lean-forward="true" selection-start-line="36" selection-start-column="11" selection-end-line="36" selection-end-column="11" />
           <folding>
             <element signature="e#127#146#0" expanded="true" />
+            <element signature="e#20309#20575#0" />
+            <element signature="e#20613#21228#0" />
+            <element signature="e#21321#25269#0" />
           </folding>
         </state>
       </provider>
@@ -399,39 +416,121 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/rge_dict_checker.py" />
     <entry file="file://$PROJECT_DIR$/logger.py" />
-    <entry file="file://$PROJECT_DIR$/dict_checker_logs">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="34">
-          <caret line="2" lean-forward="true" selection-start-line="2" selection-end-line="2" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/aux_functions.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="311">
-          <caret line="43" column="7" selection-start-line="43" selection-start-column="7" selection-end-line="43" selection-end-column="7" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/update_runner.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="237">
-          <caret line="23" column="33" lean-forward="true" selection-start-line="23" selection-start-column="33" selection-end-line="23" selection-end-column="33" />
+        <state relative-caret-position="470">
+          <caret line="63" column="63" selection-start-line="63" selection-start-column="63" selection-end-line="63" selection-end-column="63" />
           <folding>
             <element signature="e#201#273#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/updaters.py">
+    <entry file="file://$PROJECT_DIR$/aux_functions.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="206">
-          <caret line="281" column="48" selection-start-line="281" selection-start-column="34" selection-end-line="281" selection-end-column="48" />
+        <state relative-caret-position="509">
+          <caret line="57" column="18" selection-start-line="57" selection-start-column="18" selection-end-line="57" selection-end-column="18" />
           <folding>
-            <element signature="e#127#146#0" expanded="true" />
+            <element signature="e#87#121#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/dict_checker_logs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="229">
+          <caret line="46" column="19" selection-start-line="46" selection-start-column="19" selection-end-line="46" selection-end-column="19" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/updaters.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1563">
+          <caret line="290" column="45" selection-start-line="290" selection-start-column="45" selection-end-line="290" selection-end-column="45" />
+          <folding>
+            <element signature="e#127#146#0" expanded="true" />
+            <element signature="e#20309#20575#0" />
+            <element signature="e#20613#21228#0" />
+            <element signature="e#21321#25269#0" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+  </component>
+  <component name="masterDetails">
+    <states>
+      <state key="ArtifactsStructureConfigurable.UI">
+        <settings>
+          <artifact-editor />
+          <splitter-proportions>
+            <option name="proportions">
+              <list>
+                <option value="0.2" />
+              </list>
+            </option>
+          </splitter-proportions>
+        </settings>
+      </state>
+      <state key="FacetStructureConfigurable.UI">
+        <settings>
+          <last-edited>No facets are configured</last-edited>
+          <splitter-proportions>
+            <option name="proportions">
+              <list>
+                <option value="0.2" />
+              </list>
+            </option>
+          </splitter-proportions>
+        </settings>
+      </state>
+      <state key="GlobalLibrariesConfigurable.UI">
+        <settings>
+          <last-edited>Python 3.6 interpreter library</last-edited>
+          <splitter-proportions>
+            <option name="proportions">
+              <list>
+                <option value="0.2" />
+              </list>
+            </option>
+          </splitter-proportions>
+        </settings>
+      </state>
+      <state key="JdkListConfigurable.UI">
+        <settings>
+          <last-edited>Python 3.6</last-edited>
+          <splitter-proportions>
+            <option name="proportions">
+              <list>
+                <option value="0.2" />
+              </list>
+            </option>
+          </splitter-proportions>
+        </settings>
+      </state>
+      <state key="ModuleStructureConfigurable.UI">
+        <settings>
+          <last-edited>dict_checker</last-edited>
+          <splitter-proportions>
+            <option name="proportions">
+              <list>
+                <option value="0.2" />
+                <option value="0.6" />
+              </list>
+            </option>
+          </splitter-proportions>
+        </settings>
+      </state>
+      <state key="ProjectLibrariesConfigurable.UI">
+        <settings>
+          <splitter-proportions>
+            <option name="proportions">
+              <list>
+                <option value="0.2" />
+              </list>
+            </option>
+          </splitter-proportions>
+        </settings>
+      </state>
+    </states>
   </component>
 </project>

@@ -69,7 +69,6 @@ class RgeDictUpdater:
         """
 
         def launch_query(query):
-
             """
             Launches specified query on the database
             :param query: string representing sql query
@@ -83,7 +82,6 @@ class RgeDictUpdater:
             return result
 
         def construct_query():
-
             """
             Constructs query text
             :return: text of the query
@@ -156,7 +154,6 @@ class RgeDictUpdater:
         dict_rio = dict_rio[dict_rio['STATION_CODE_RIO'].notna()]
 
         # check if merging was OK
-        print(f'{dict_rio.shape[0]} + {not_found_in_rio.shape[0]} = {actual_dict_rows.shape[0]}')
         assert (actual_dict_rows.shape[0] == dict_rio.shape[0] + not_found_in_rio.shape[0])
 
         # check for duplicate RGE codes
@@ -413,7 +410,6 @@ class RgeDictUpdater:
 
 
 class RegistryGenUpdater:
-
     """Class for checking 'dict_registry_gen' table for updates."""
 
     def __init__(self, rio_path, dict_path, begin_date, end_date, version=0, dict_sheet_name='REGISTRY_GEN'):
@@ -473,7 +469,6 @@ class RegistryGenUpdater:
         dict_rio = dict_rio[dict_rio['TRADER_CODE_RIO'].notna()]
 
         # check if merging was OK
-        print(f'{dict_rio.shape[0]} + {not_found_in_rio.shape[0]} = {actual_dict_rows.shape[0]}')
         assert (actual_dict_rows.shape[0] == dict_rio.shape[0] + not_found_in_rio.shape[0])
 
         # check for duplicate station codes
@@ -539,7 +534,7 @@ class RegistryGenUpdater:
 
             """
             Function for retrieving information about holding from
-                existing pairs tradec_code -> holding in dict_registry_gen
+                existing pairs trader_code -> holding in dict_registry_gen
             :param df: distinct selection of pairs tradec_code -> holding
                         from dict_registry_gen table (columns: TRADER_CODE, HOLDING, CODE)
             :param miss: list of trader_code values of dataframe
@@ -553,7 +548,7 @@ class RegistryGenUpdater:
                 df_t = df[df.TRADER_CODE == k].drop_duplicates()
                 if df_t.empty:
                     res[k] = (v, k)
-                    print(f'Trader code {k} was not mentioned before in dict_registry_gen table!')
+                    logging.info(f'Trader code {k} was not mentioned before in dict_registry_gen table!')
                 else:
                     res[k] = (df_t.HOLDING.values[0], df_t.CODE.values[0])
             return res
@@ -744,7 +739,6 @@ class RegistryGenUpdater:
 
 
 class HoldingsUpdater:
-
     """ Encapsulates functions for updating holding information of dictionary """
 
     def __init__(self, dict_path, registry_sheet, holdings_sheet):
@@ -799,9 +793,9 @@ class HoldingsUpdater:
                                                suffixes=('_REG', '_HOLD'))
 
         # select all new rows
-        holdings_new = reg_hold_holdings[reg_hold_holdings.isnull().any(axis=1)][['HOLDING_REG', 'CODE']]\
+        holdings_new = reg_hold_holdings[reg_hold_holdings.isnull().any(axis=1)][['HOLDING_REG', 'CODE']] \
             .rename(index=str, columns={'HOLDING_REG': 'HOLDING'})
-        print(holdings_new.shape[0])
+
         if holdings_new.empty:
             holdings_new = pd.DataFrame(columns=[c.upper() for c in self.init_cols])
         else:
@@ -815,7 +809,7 @@ class HoldingsUpdater:
         result_holdings = pd.concat([holdings_data, holdings_new], axis=0)
 
         # check for equality in column dimension
-        assert(result_holdings.shape[1] == holdings_data.shape[1])
+        assert (result_holdings.shape[1] == holdings_data.shape[1])
 
         result_holdings = result_holdings[[c.upper() for c in self.init_cols]]
         result_holdings.columns = self.init_cols
