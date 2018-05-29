@@ -7,7 +7,7 @@
 import pandas as pd
 from aux_functions import compare_str_fields, compare_str_series, to_spreadsheet, excel_date
 from sqlalchemy import create_engine
-from datetime import date
+from datetime import date, timedelta
 from day_ahead_scripts import config
 import logging
 import warnings
@@ -270,7 +270,7 @@ class RgeDictUpdater:
                                              'DATE_FROM', 'DATE_TO', 'AUTHOR', 'STATE', 'DATE_MODIFIED', 'COMMENT']]
 
             # update value of the date_to field
-            old_rows['DATE_TO'] = pd.to_datetime(date.today().replace(day=1).isoformat())
+            old_rows['DATE_TO'] = pd.to_datetime((date.today().replace(day=1) - timedelta(days=1)).isoformat())
 
             new_rows = unmatched_codes_rows[['STATION_CODE_RIO', 'STATION_NAME_RIO', 'GTP_CODE_RIO',
                                              'GTP_NAME_RIO', 'RGE_NUM', 'RGE_NAME_RIO', 'DAY_AHEAD_TYPE',
@@ -618,7 +618,7 @@ class RegistryGenUpdater:
                                              'DATE_FROM', 'DATE_TO', 'AUTHOR', 'STATE', 'DATE_MODIFIED', 'COMMENT']]
 
             # update value of the date_to field
-            old_rows['DATE_TO'] = pd.to_datetime(date.today().replace(day=1).isoformat())
+            old_rows['DATE_TO'] = pd.to_datetime((date.today().replace(day=1) - timedelta(days=1)).isoformat())
 
             new_rows = unmatched_codes_rows[['TRADER_CODE_RIO', 'TRADER_NAME_RIO', 'STATION_CODE',
                                              'STATION_NAME_RIO', 'STATION_TYPE', 'HOLDING', 'CODE',
@@ -717,16 +717,16 @@ class RegistryGenUpdater:
 
         # check if sum of numbers of rows in different components of result_df is equal to
         # number of columns of result_df
-        assert (result_df.shape[0] == not_found_rows.shape[0] + matched_rows.shape[0] + new_rows.shape[0]
-                + old_rows.shape[0] + new_stations_fixed.shape[0] + unmatched_names_fixed.shape[0]
+        assert (result_df.shape[0] == not_found_rows.shape[0] + matched_rows.shape[0] + unmatched_codes_fixed.shape[0]
+                + new_stations_fixed.shape[0] + unmatched_names_fixed.shape[0]
                 + other_rows.shape[0] + not_actual_rows)
 
         logging.info(f'\nInitial number of rows in dict_registry_gen: {self.dict_data.shape[0]} \n'
                      f'Initial number of rows in rio_data: {self.rio_data.shape[0]} \n'
                      f'{not_found_rows.shape[0]} rows of dict_data were not found in rio_data \n'
                      f'{matched_rows.shape[0]} fully matched rows were found. \n'
-                     f'{new_rows.shape[0] + new_stations_fixed.shape[0]} new rows were added. \n'
-                     f'{new_rows.shape[0]} of them are with updated params. \n'
+                     f'{unmatched_codes_fixed.shape[0] / 2 + new_stations_fixed.shape[0]} new rows were added. \n'
+                     f'{unmatched_codes_fixed.shape[0] / 2} of them are with updated params. \n'
                      f'{new_stations_fixed.shape[0]} of them are with new stations. \n'
                      f'In {unmatched_names_fixed.shape[0]} of rows station_name or trader_name were updated. \n'
                      f'In {other_rows.shape[0]} some differences were found, but were ignored determinately. \n'
@@ -783,6 +783,8 @@ class HoldingsUpdater:
         logging.info('Start updating holdings info...')
 
         # select only actual rows
+
+        # TODO: if target file path differs from source, holdings does not work correctly - fix it!
         registry_data = self.registry_data[self.registry_data.DATE_TO.isna()]
         holdings_data = self.holdings_data[self.holdings_data.DATE_TO.isna()]
 
@@ -814,6 +816,11 @@ class HoldingsUpdater:
         result_holdings = result_holdings[[c.upper() for c in self.init_cols]]
         result_holdings.columns = self.init_cols
         result_holdings = result_holdings.sort_values(['holding'])
+        result_holdings['date_from'] = result_holdings['date_from'].map(excel_date)
+
+        # TODO: something wrong with this, need to find out what ...
+        # result_holdings['date_to'] = result_holdings['date_to'].map(excel_date)
+        result_holdings['date_modified'] = result_holdings['date_modified'].map(excel_date)
 
         logging.info(f'{self.holdings_data.shape[0]} rows were in initial data. \n'
                      f'{hold_holdings.shape[0]} actual rows were in initial data. \n'
