@@ -50,8 +50,8 @@ time_index <- seq(from = as.POSIXct("2016-01-01 00:00"),
                   to = as.POSIXct("2018-05-21 23:00"), by = "hour")
 nodePrice101160 <- xts(nodePrice101160, order.by = time_index, unique = TRUE)
 nodePrice101161 <- xts(nodePrice101161, order.by = time_index, unique = TRUE)
-attr(nodePrice101160, 'frequency') <- 8736 
-attr(nodePrice101161, 'frequency') <- 8736 
+attr(nodePrice101160, 'frequency') <- 168 # 24 - for dayly seasonality, 168 - for weekly, 8736 - yearly
+attr(nodePrice101161, 'frequency') <- 168 # 24 - for dayly seasonality, 168 - for weekly, 8736 - yearly
 
 # convert to ts objects
 nodePrice101160_ts <- as.ts(nodePrice101160)
