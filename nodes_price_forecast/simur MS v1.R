@@ -45,15 +45,14 @@ nodePrice101161 <- msts(nodePrice101161, seasonal.periods = c(24, 168, 8736))
 
 # fitting tbats multiple seasonality model
 model_0 <- tbats(nodePrice101160) 
-model_1 <- tbats(nodePrice101161, seasonal.periods = c(24, 168, 8736))
+model_1 <- tbats(nodePrice101161)
 
 # forecasting
 fcst_0 <- forecast(model_0, h = days * 24)
-fcst_0 <- forecast(model_0)
 fcst_1 <- forecast(model_1, h = days * 24)
 
-plot(head(fcst_0$mean, 504), type="l", col = "red")
-plot(tail(nodePrice101160, 504), type="l", col="blue")
+plot(fcst_0$mean, type="l", col = "red")
+lines(nodePrice101160, type="l", col="blue")
 
 fcst_1 <- predict(model_1, days * 24)
 

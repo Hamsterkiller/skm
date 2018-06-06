@@ -309,6 +309,10 @@ class RgeDictUpdater:
                                                           'DATE_FROM', 'DATE_TO', 'AUTHOR', 'STATE', 'DATE_MODIFIED',
                                                           'COMMENT']]
             unmatched_names_fixed.columns = out_cols
+            # for logging
+            unmatched_names_log = unmatched_names_rows[['RGE_NUM', 'STATION_NAME_DICT', 'STATION_NAME_RIO']]\
+                .drop_duplicates().set_index(['RGE_NUM']).to_dict()
+            logging.info(f'RGE codes with unmatched names: {unmatched_names_log}')
         else:
             unmatched_names_fixed = pd.DataFrame(columns=out_cols)
 

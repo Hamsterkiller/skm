@@ -14,14 +14,14 @@ from aux_functions import to_spreadsheet
 
 if __name__ == "__main__":
 
-    date_from = date(2018, 5, 1)
-    date_to = date(2018, 5, 1)
+    date_from = date(2018, 6, 1)    # set before launch
+    date_to = date(2018, 6, 1)      # set before launch
     log_path = os.path.join(os.getcwd(), 'dict_checker_logs')
     logging.basicConfig(format=u'%(filename)s[LINE:%(lineno)d]# %(levelname)-8s [%(asctime)s]  %(message)s',
                         level=logging.DEBUG, filename=log_path, filemode='w')
-    rio_path = 'data/RIO_2018_05.xlsx'
-    dict_path = 'data/hdbk_350.xlsx'
-    dict_path_upd = 'data/hdbk_350.xlsx'
+    rio_path = 'data/RIO_2018_06.xlsx'      # set before launch
+    dict_path = 'data/hdbk_358.xlsx'        # set before launch
+    dict_path_upd = 'data/hdbk_358.xlsx'    # set before launch
     logging.info('\nStarting...')
 
     # create instance of the GTPRGE_GEN updater

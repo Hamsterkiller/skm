@@ -1,65 +1,51 @@
-update_runner.py[LINE:25]# INFO     [2018-05-29 17:38:47,507]  
+update_runner.py[LINE:25]# INFO     [2018-06-01 11:57:12,055]  
 Starting...
-updaters.py[LINE:77]# INFO     [2018-05-29 17:38:52,083]  Executing query...
-updaters.py[LINE:80]# INFO     [2018-05-29 17:38:53,426]  Executing finished!
-update_runner.py[LINE:34]# INFO     [2018-05-29 17:38:53,426]  Starting GTPRGE_GEN dict comparison ...
-updaters.py[LINE:151]# INFO     [2018-05-29 17:38:53,434]  0 RGEs were not found in RIO
-update_runner.py[LINE:36]# INFO     [2018-05-29 17:38:53,832]  Comparison of RGE data is finished ...
-updaters.py[LINE:396]# INFO     [2018-05-29 17:38:53,902]  
+updaters.py[LINE:77]# INFO     [2018-06-01 11:57:16,671]  Executing query...
+updaters.py[LINE:80]# INFO     [2018-06-01 11:57:17,970]  Executing finished!
+update_runner.py[LINE:34]# INFO     [2018-06-01 11:57:17,970]  Starting GTPRGE_GEN dict comparison ...
+updaters.py[LINE:151]# INFO     [2018-06-01 11:57:17,978]  2 RGEs were not found in RIO
+update_runner.py[LINE:36]# INFO     [2018-06-01 11:57:18,381]  Comparison of RGE data is finished ...
+updaters.py[LINE:315]# INFO     [2018-06-01 11:57:18,386]  RGE codes with unmatched names: {'STATION_NAME_DICT': {4062: 'Раякоски ГЭС-6', 4070: 'Верхнетериберская ГЭС-18', 4071: 'Нижнетериберская ГЭС-19'}, 'STATION_NAME_RIO': {4062: 'Раякоски ГЭС (ГЭС-6)', 4070: 'Верхне-Териберская ГЭС (ГЭС-18)', 4071: 'Нижне-Териберская ГЭС (ГЭС-19)'}}
+updaters.py[LINE:400]# INFO     [2018-06-01 11:57:18,457]  
 Initial number of rows in dict_gtprge_gen: 1632 
-Initial number of rows in rio_data: 1535 
-387 fully matched rows were found. 
+Initial number of rows in rio_data: 1533 
+437 fully matched rows were found. 
 0 new rows were added. 
 0 of them are with updated params. 
 0 of them are with new RGEs. 
-In 214 of rows station_name was updated. 
-In 870 some differences were found, but were ignored determinately. 
+In 3 of rows station_name was updated. 
+In 1029 some differences were found, but were ignored determinately. 
 161 rows were initially not actual in dict_data.. 
 List of newly added RGEs, that are not found in RIO data: [] 
 Number of rows in updated part of dict_gtprge_gen: 1471 
 Total number of rows in updated dict_gtprge_gen: 1632
 
-update_runner.py[LINE:44]# INFO     [2018-05-29 17:38:53,902]  Start updating GTPRGE_GEN sheet in excel file...
-update_runner.py[LINE:46]# INFO     [2018-05-29 17:39:16,251]  Updating of GTPRGE_GEN sheet is finished.
-update_runner.py[LINE:55]# INFO     [2018-05-29 17:39:20,743]  Starting REGISTRY_GEN dict comparison ...
-update_runner.py[LINE:58]# INFO     [2018-05-29 17:39:21,006]  Comparison of REGISTRY_GEN data is finished ...
-updaters.py[LINE:551]# INFO     [2018-05-29 17:39:21,074]  Trader code MRSKSEVZ was not mentioned before in dict_registry_gen table!
-updaters.py[LINE:551]# INFO     [2018-05-29 17:39:21,076]  Trader code MRSKSIBR was not mentioned before in dict_registry_gen table!
-updaters.py[LINE:551]# INFO     [2018-05-29 17:39:21,080]  Trader code SVERDGAZ was not mentioned before in dict_registry_gen table!
-updaters.py[LINE:551]# INFO     [2018-05-29 17:39:21,082]  Trader code CHIMPROM was not mentioned before in dict_registry_gen table!
-updaters.py[LINE:551]# INFO     [2018-05-29 17:39:21,084]  Trader code NOVSLTEC was not mentioned before in dict_registry_gen table!
-updaters.py[LINE:551]# INFO     [2018-05-29 17:39:21,085]  Trader code TELMAGES was not mentioned before in dict_registry_gen table!
-updaters.py[LINE:551]# INFO     [2018-05-29 17:39:21,087]  Trader code VOLTEPLG was not mentioned before in dict_registry_gen table!
-updaters.py[LINE:551]# INFO     [2018-05-29 17:39:21,095]  Trader code KALMENER was not mentioned before in dict_registry_gen table!
-updaters.py[LINE:551]# INFO     [2018-05-29 17:39:21,100]  Trader code GRACHSES was not mentioned before in dict_registry_gen table!
-updaters.py[LINE:551]# INFO     [2018-05-29 17:39:21,101]  Trader code BUGULSES was not mentioned before in dict_registry_gen table!
-updaters.py[LINE:551]# INFO     [2018-05-29 17:39:21,102]  Trader code PLESHSES was not mentioned before in dict_registry_gen table!
-updaters.py[LINE:551]# INFO     [2018-05-29 17:39:21,105]  Trader code TGVOLSCH was not mentioned before in dict_registry_gen table!
-updaters.py[LINE:632]# INFO     [2018-05-29 17:39:21,105]  Newly found holdings: 
-{'MRSKSEVZ': ('ПАО "МРСК Северо-Запада"', 'MRSKSEVZ'), 'RNENERGO': ('ПАО «Интер РАО»', 'INT'), 'MRSKSIBR': ('ПАО "МРСК Сибири"', 'MRSKSIBR'), 'KARELENE': ('ПАО ГК «ТНС энерго»', 'TNS'), 'ENERGOPK': ('ЗАО "ЭПК"', 'EPK'), 'SVERDGAZ': ('АО "СЭГК"', 'SVERDGAZ'), 'TEKENERG': ('ООО "ТЭК-Энерго"', 'TEK'), 'CHIMPROM': ('ПАО "Химпром"', 'CHIMPROM'), 'NOVSLTEC': ('ООО "НСТЭЦ"', 'NOVSLTEC'), 'TELMAGES': ('ООО "ЕвроСибЭнерго-Гидрогенерация"', 'TELMAGES'), 'PERMENER': ('ПАО "Пермэнергосбыт"', 'PER'), 'VOLTEPLG': ('ООО "Волгодонская тепловая генерация"', 'VOLTEPLG'), 'SAMARAEN': ('ПАО "Самараэнерго"', 'SAM'), 'MAGNENKO': ('ООО "МЭК"', 'MEK'), 'ORENBENE': ('ПАО «Т ПЛЮС»', 'PLYU'), 'RYAZENER': ('ПАО "РЭСК" (г.Рязань)', 'RESK'), 'MOSENERG': ('ПАО «Интер РАО»', 'INT'), 'KALMENER': ('АО "Калмэнергосбыт"', 'KALMENER'), 'ROSTOVEN': ('ПАО ГК «ТНС энерго»', 'TNS'), 'MORDOVEN': ('ПАО "Мордовская энергосбытовая компания"', 'MOR'), 'ZAOESNKB': ('НК "Роснефть"', 'OSN'), 'GRACHSES': ('ООО "ГРАЧЕВСКАЯ СЭС"', 'GRACHSES'), 'BUGULSES': ('ООО "Бугульчанская СЭС"', 'BUGULSES'), 'PLESHSES': ('ООО "ПЛЕШАНОВСКАЯ СЭС"', 'PLESHSES'), 'VOLGOGEN': ('ПАО "Волгоградэнергосбыт"', 'VOL'), 'TGVOLSCH': ('ООО "Тепловая генерация г. Волжского"', 'TGVOLSCH')}
-updaters.py[LINE:652]# INFO     [2018-05-29 17:39:21,302]  40 rows were added!
-updaters.py[LINE:724]# INFO     [2018-05-29 17:39:21,344]  
-Initial number of rows in dict_registry_gen: 820 
-Initial number of rows in rio_data: 779 
-2 rows of dict_data were not found in rio_data 
-456 fully matched rows were found. 
-40.0 new rows were added. 
-40.0 of them are with updated params. 
+update_runner.py[LINE:44]# INFO     [2018-06-01 11:57:18,457]  Start updating GTPRGE_GEN sheet in excel file...
+update_runner.py[LINE:46]# INFO     [2018-06-01 11:57:43,547]  Updating of GTPRGE_GEN sheet is finished.
+update_runner.py[LINE:55]# INFO     [2018-06-01 11:57:48,211]  Starting REGISTRY_GEN dict comparison ...
+update_runner.py[LINE:58]# INFO     [2018-06-01 11:57:48,534]  Comparison of REGISTRY_GEN data is finished ...
+updaters.py[LINE:728]# INFO     [2018-06-01 11:57:48,579]  
+Initial number of rows in dict_registry_gen: 860 
+Initial number of rows in rio_data: 777 
+4 rows of dict_data were not found in rio_data 
+753 fully matched rows were found. 
+0.0 new rows were added. 
+0.0 of them are with updated params. 
 0 of them are with new stations. 
-In 283 of rows station_name or trader_name were updated. 
+In 24 of rows station_name or trader_name were updated. 
 In 0 some differences were found, but were ignored determinately. 
-39 rows were initially not actual in dict_data. 
+79 rows were initially not actual in dict_data. 
 List of newly added stations, that are not found in RIO data: [] 
-Updated part of dict_data has 821 rows. 
+Updated part of dict_data has 781 rows. 
 Total number of rows in updated dict_registry_gen: 860
 
-update_runner.py[LINE:68]# INFO     [2018-05-29 17:39:21,344]  Start updating REGISTRY_GEN sheet in excel file...
-update_runner.py[LINE:70]# INFO     [2018-05-29 17:39:43,715]  Updating of REGISTRY_GEN sheet is finished.
-updaters.py[LINE:783]# INFO     [2018-05-29 17:39:52,287]  Start updating holdings info...
-updaters.py[LINE:825]# INFO     [2018-05-29 17:39:52,305]  135 rows were in initial data. 
-135 actual rows were in initial data. 
-12 new holding rows were added. 
+update_runner.py[LINE:68]# INFO     [2018-06-01 11:57:48,579]  Start updating REGISTRY_GEN sheet in excel file...
+update_runner.py[LINE:70]# INFO     [2018-06-01 11:58:12,034]  Updating of REGISTRY_GEN sheet is finished.
+updaters.py[LINE:787]# INFO     [2018-06-01 11:58:20,887]  Start updating holdings info...
+updaters.py[LINE:829]# INFO     [2018-06-01 11:58:20,900]  147 rows were in initial data. 
+147 actual rows were in initial data. 
+0 new holding rows were added. 
 147 are in updated holdings data. 
 
-update_runner.py[LINE:80]# INFO     [2018-05-29 17:39:52,305]  Start updating HOLDINGS sheet in excel file...
-update_runner.py[LINE:82]# INFO     [2018-05-29 17:40:15,341]  Updating of HOLDINGS sheet is finished.
+update_runner.py[LINE:80]# INFO     [2018-06-01 11:58:20,900]  Start updating HOLDINGS sheet in excel file...
+update_runner.py[LINE:82]# INFO     [2018-06-01 11:58:44,640]  Updating of HOLDINGS sheet is finished.
