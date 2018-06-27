@@ -25,9 +25,11 @@
 # Day light
 # https://cran.r-project.org/web/packages/geosphere/geosphere.pdf
 
+rm(list = ls())
+
 #### Prediction data set ####
-dayStart <- as.Date("2018-05-01") # ENTER START DATE FOR PREDICTION HERE
-dayEnd <- as.Date("2018-07-31") # ENTER END DATE FOR PREDICTION HERE
+dayStart <- as.Date("2018-06-01") # ENTER START DATE FOR PREDICTION HERE
+dayEnd <- as.Date("2018-08-31") # ENTER END DATE FOR PREDICTION HERE
 days <- as.numeric(dayEnd - dayStart + 1)
 
 library("geosphere")
@@ -63,9 +65,9 @@ temperature <- rep(temperature[,2],each=24)
 predDs <-data.frame(nodePrice101160,nodePrice101161,date,hour,dayLength,dayWeek,dayOff,temperature)
 
 #### Study data set ####
-dayStartStudy <- as.Date("2015-01-01") # ENTER START DATE OF STUDY DATA SET HERE
+dayStartStudy <- as.Date("2016-01-01") # ENTER START DATE OF STUDY DATA SET HERE
 #dayEndStudy <- Sys.Date()-1
-dayEndStudy <- as.Date("2018-05-21")
+dayEndStudy <- as.Date("2018-06-20")
 daysStudy <- as.numeric(dayEndStudy - dayStartStudy + 1)
 
 library("geosphere")
@@ -83,6 +85,28 @@ temperature <-read.csv(paste("https://exergy.skmenergy.com/api/data/?alt=csv&fro
                              dayStartStudy,"T00:00&to=",
                              dayEndStudy,
                              "T23:00&series=TEMPMEAN_28275_D", sep=""))
+
+# imputing missing data (with median values of the temperature in the corresponding month)
+require("lubridate")
+temperature$date <- as.POSIXlt(temperature$date, format="%m/%d/%Y")
+temperature$month <- floor_date(temperature$date, "month")
+
+result_df <- data.frame(matrix(ncol = ncol(temperature), nrow = 0))
+colnames(result_df) <- colnames(temperature)
+impute.var <- colnames(temperature)[2]
+months <- unique(temperature$month)
+for (m in 1:length(months)) {
+  df_m <- temperature[temperature$month == months[m], ]
+  if (length(df_m[which(is.na(df_m[, impute.var]) == TRUE), impute.var]) > 0) {
+    print("Imputing missing data...")
+    df_m[which(is.na(df_m[, impute.var]) == TRUE), impute.var] = 
+      median(df_m[which(is.na(df_m[, impute.var]) == FALSE), impute.var])
+  }
+  result_df <- rbind(result_df, df_m)
+}
+
+temperature <- result_df[, colnames(temperature)[1: 2]]
+
 
 dayOff <- read.csv(paste("https://exergy.skmenergy.com/api/data/?alt=csv&from=",
                          dayStartStudy,"T00:00&to=",

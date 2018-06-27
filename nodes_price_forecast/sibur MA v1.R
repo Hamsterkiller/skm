@@ -26,13 +26,13 @@ dbDisconnect(con)
 
 
 # prediction period dates
-dayStart <- as.Date("2018-05-01") # ENTER START DATE FOR PREDICTION HERE
-dayEnd <- as.Date("2018-07-31") # ENTER END DATE FOR PREDICTION HERE
+dayStart <- as.Date("2018-06-01") # ENTER START DATE FOR PREDICTION HERE
+dayEnd <- as.Date("2018-08-31") # ENTER END DATE FOR PREDICTION HERE
 days <- as.numeric(dayEnd - dayStart + 1)
 
 # train set dates
 dayStartStudy <- as.Date("2016-01-01")
-dayEndStudy <- as.Date("2018-05-21")
+dayEndStudy <- as.Date("2018-06-20")
 daysStudy <- as.numeric(dayEndStudy - dayStartStudy + 1)
 
 # load fact prices
@@ -47,11 +47,11 @@ nodePrice101161 <-read.csv(paste("https://exergy.skmenergy.com/api/data/?alt=csv
 
 # converting to xts
 time_index <- seq(from = as.POSIXct("2016-01-01 00:00"), 
-                  to = as.POSIXct("2018-05-21 23:00"), by = "hour")
+                  to = as.POSIXct("2018-06-20 23:00"), by = "hour")
 nodePrice101160 <- xts(nodePrice101160, order.by = time_index, unique = TRUE)
 nodePrice101161 <- xts(nodePrice101161, order.by = time_index, unique = TRUE)
-attr(nodePrice101160, 'frequency') <- 168 # 24 - for dayly seasonality, 168 - for weekly, 8736 - yearly
-attr(nodePrice101161, 'frequency') <- 168 # 24 - for dayly seasonality, 168 - for weekly, 8736 - yearly
+attr(nodePrice101160, 'frequency') <- 8736 # 24 - for dayly seasonality, 168 - for weekly, 8736 - yearly
+attr(nodePrice101161, 'frequency') <- 8736 # 24 - for dayly seasonality, 168 - for weekly, 8736 - yearly
 
 # convert to ts objects
 nodePrice101160_ts <- as.ts(nodePrice101160)
@@ -62,8 +62,8 @@ model_0 <- HoltWinters(nodePrice101160_ts, beta = FALSE, seasonal = "add") # Exp
 model_1 <- HoltWinters(nodePrice101161_ts, beta = FALSE, seasonal = "add") # Exponential smoothing
 
 # forecasting prices for days * 24 hours
-time_index_fcst <- seq(from = as.POSIXct("2018-05-01 00:00"), 
-                       to = as.POSIXct("2018-07-31 23:00"), by = "hour")
+time_index_fcst <- seq(from = as.POSIXct("2018-06-01 00:00"), 
+                       to = as.POSIXct("2018-08-31 23:00"), by = "hour")
 nodePrice101160_fcst <- predict(model_0, days * 24)
 nodePrice101161_fcst <- predict(model_1, days * 24)
 
@@ -71,8 +71,8 @@ nodePrice101160_fcst <- xts(as.vector(nodePrice101160_fcst), order.by = time_ind
 nodePrice101161_fcst <- xts(as.vector(nodePrice101161_fcst), order.by = time_index_fcst, unique = TRUE)
 
 # check fact vs forecasted values for may2018
-fact_may <- tail(nodePrice101161, 504)
-fcst_may <- head(nodePrice101161_fcst, 504)
+fact_may <- tail(nodePrice101160, 504)
+fcst_may <- head(nodePrice101160_fcst, 504)
 
 plot(fact_may, type="l", col = "red")
 lines(fcst_may, type="l", col ="blue")

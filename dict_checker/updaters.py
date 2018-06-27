@@ -384,9 +384,9 @@ class RgeDictUpdater:
         cols_lower = [c.lower() for c in out_cols]
         result_df.columns = cols_lower
 
-        result_df['date_from'] = result_df['date_from'].map(excel_date)
-        result_df['date_to'] = result_df['date_to'].map(excel_date)
-        result_df['date_modified'] = result_df['date_modified'].map(excel_date)
+        # result_df['date_from'] = result_df['date_from'].map(excel_date)
+        # result_df['date_to'] = result_df['date_to'].map(excel_date)
+        # result_df['date_modified'] = result_df['date_modified'].map(excel_date)
 
         # check for a constant number of columns
         assert (self.dict_data.shape[1] == result_df.shape[1])
@@ -712,9 +712,9 @@ class RegistryGenUpdater:
         result_df = pd.concat([result_df, archived_dict_rows], axis=0).sort_values(['STATION_CODE', 'DATE_TO'])
         cols_lower = [c.lower() for c in out_cols]
         result_df.columns = cols_lower
-        result_df['date_from'] = result_df['date_from'].map(excel_date)
-        result_df['date_to'] = result_df['date_to'].map(excel_date)
-        result_df['date_modified'] = result_df['date_modified'].map(excel_date)
+        # result_df['date_from'] = result_df['date_from'].map(excel_date)
+        # result_df['date_to'] = result_df['date_to'].map(excel_date)
+        # result_df['date_modified'] = result_df['date_modified'].map(excel_date)
 
         # check for a constant number of columns
         assert (self.dict_data.shape[1] == result_df.shape[1])
@@ -820,11 +820,11 @@ class HoldingsUpdater:
         result_holdings = result_holdings[[c.upper() for c in self.init_cols]]
         result_holdings.columns = self.init_cols
         result_holdings = result_holdings.sort_values(['holding'])
-        result_holdings['date_from'] = result_holdings['date_from'].map(excel_date)
+        # result_holdings['date_from'] = result_holdings['date_from'].map(excel_date)
 
         # TODO: something wrong with this, need to find out what ...
         # result_holdings['date_to'] = result_holdings['date_to'].map(excel_date)
-        result_holdings['date_modified'] = result_holdings['date_modified'].map(excel_date)
+        # result_holdings['date_modified'] = result_holdings['date_modified'].map(excel_date)
 
         logging.info(f'{self.holdings_data.shape[0]} rows were in initial data. \n'
                      f'{hold_holdings.shape[0]} actual rows were in initial data. \n'
